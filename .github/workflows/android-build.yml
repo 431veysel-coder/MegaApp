@@ -46,9 +46,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
 
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses
-
       - name: Setup Android SDK & NDK
         run: |
           # Install Android SDK platform and build tools
@@ -59,6 +56,13 @@ jobs:
           sdkmanager "ndk;${{ env.NDK_VERSION }}"
           # Set ANDROID_NDK_HOME for Gradle
           echo "ANDROID_NDK_HOME=$(find /usr/local/lib/android/sdk/ndk -maxdepth 1 -type d | tail -1)" >> $GITHUB_ENV
+          # Add to PATH
+          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/build-tools/$(ls /usr/local/lib/android/sdk/build-tools | tail -1)" >> $GITHUB_PATH
+
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -141,13 +145,16 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses
       - name: Setup Android SDK
         run: |
           sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
                      "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
                      "platform-tools"
+          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/build-tools/$(ls /usr/local/lib/android/sdk/build-tools | tail -1)" >> $GITHUB_PATH
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses
       - run: gradle :app:lintDebug --no-daemon
       - run: gradle :app:testDebugUnitTest --no-daemon
 
@@ -161,11 +168,14 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses
       - name: Setup Android SDK
         run: |
           sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
                      "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
                      "platform-tools"
+          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/build-tools/$(ls /usr/local/lib/android/sdk/build-tools | tail -1)" >> $GITHUB_PATH
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses
       - run: gradle :app:dependencies --configuration releaseRuntimeClasspath --no-daemon
