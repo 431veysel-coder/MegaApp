@@ -19,6 +19,8 @@ env:
   GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.parallel=true -Dorg.gradle.caching=true"
   JAVA_VERSION: "17"
   GRADLE_VERSION: "8.5"
+  ANDROID_SDK_VERSION: "35"
+  NDK_VERSION: "26.1.10909125"
 
 jobs:
   build:
@@ -30,9 +32,6 @@ jobs:
       matrix:
         arch: [arm64-v8a]
         type: [debug, release]
-        include:
-          - arch: arm64-v8a
-            ndk_version: "26.1.10909125"
 
     steps:
       - name: Checkout
@@ -49,12 +48,17 @@ jobs:
 
       - name: Accept Android Licenses
         run: yes | sdkmanager --licenses
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 35
-          ndk-version: ${{ matrix.ndk_version }}
-          cmdline-tools-version: "latest"
+
+      - name: Setup Android SDK & NDK
+        run: |
+          # Install Android SDK platform and build tools
+          sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
+                     "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
+                     "platform-tools"
+          # Install NDK
+          sdkmanager "ndk;${{ env.NDK_VERSION }}"
+          # Set ANDROID_NDK_HOME for Gradle
+          echo "ANDROID_NDK_HOME=$(find /usr/local/lib/android/sdk/ndk -maxdepth 1 -type d | tail -1)" >> $GITHUB_ENV
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -140,9 +144,13 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
-      - uses: android-actions/setup-android@v3
-        with:
-          api-level: 35
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses
+      - name: Setup Android SDK
+        run: |
+          sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
+                     "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
+                     "platform-tools"
       - run: chmod +x ./gradlew
       - run: ./gradlew :app:lintDebug --no-daemon
       - run: ./gradlew :app:testDebugUnitTest --no-daemon
@@ -156,4 +164,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
-      - run: ./gradlew :app:dependencies --configuration releaseRuntimeClasspath
+          cache: 'gradle'
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses
+      - name: Setup Android SDK
+        run: |
+          sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
+                     "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
+                     "platform-tools"
+      - run: chmod +x ./gradlew
+      - run: ./gradlew :app:dependencies --configuration releaseRuntimeClasspath --no-daemon
