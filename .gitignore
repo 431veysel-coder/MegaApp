@@ -1,0 +1,45 @@
+# Gradle
+.gradle/
+build/
+*/build/
+*/build/
+!*/src/main/**/build.gradle.kts
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keystore
+*.keystore
+*.jks
+*.p12
+*.base64
+
+# Local config
+local.properties
+gradle.properties.local
+
+# Logs
+*.log
+
+# Output
+*.apk
+*.aab
+*.apks
+
+# Coverage
+*.ec
+coverage/
+
+# Temporary
+tmp/
+temp/
+*.tmp

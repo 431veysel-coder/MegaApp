@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#3700B3">
+    <title>MegaApp SuperBrowser - Phase 0</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #121212;
+            --surface: #1E1E1E;
+            --primary: #BB86FC;
+            --primary-variant: #3700B3;
+            --on-primary: #121212;
+            --on-surface: #FFFFFF;
+            --on-surface-variant: #B0B0B0;
+            --border: #333333;
+            --success: #03DAC5;
+            --error: #CF6679;
+            --warning: #FFB300;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--on-surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-variant));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--on-primary);
+            font-size: 18px;
+        }
+        h1 { font-size: 1.25rem; font-weight: 600; }
+        .version { font-size: 0.75rem; color: var(--on-surface-variant); background: var(--bg); padding: 2px 8px; border-radius: 12px; }
+        main { flex: 1; padding: 24px 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .card h2 { font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card h2::before { content: ''; width: 4px; height: 20px; background: var(--primary); border-radius: 2px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 8px 8px 8px 0;
+        }
+        .btn-primary { background: var(--primary); color: var(--on-primary); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary { background: var(--bg); color: var(--on-surface); border: 1px solid var(--border); }
+        .btn-success { background: var(--success); color: var(--bg); }
+        .btn-error { background: var(--error); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .output {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: 'Monospace', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .output .log { color: var(--on-surface-variant); }
+        .output .success { color: var(--success); }
+        .output .error { color: var(--error); }
+        .output .warn { color: var(--warning); }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .status-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .status-label { font-size: 0.75rem; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-value { font-size: 1rem; font-weight: 600; margin-top: 4px; }
+        .status-value.ok { color: var(--success); }
+        .status-value.pending { color: var(--warning); }
+        .status-value.fail { color: var(--error); }
+        .phase-badge {
+            display: inline-block;
+            background: var(--primary-variant);
+            color: var(--on-primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        footer {
+            padding: 20px;
+            text-align: center;
+            color: var(--on-surface-variant);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .feature-list { list-style: none; display: grid; gap: 8px; margin-top: 12px; }
+        .feature-list li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+        .feature-list li::before { content: '✓'; color: var(--success); font-weight: bold; }
+        .feature-list li.pending::before { content: '○'; color: var(--warning); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">M</div>
+            <div>
+                <h1>MegaApp SuperBrowser</h1>
+                <span class="version">Phase 0 • v0.1.0</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="phase-badge">Phase 0: Minimum Viable APK</div>
+
+        <!-- App Info Card -->
+        <section class="card">
+            <h2>Uygulama Bilgisi</h2>
+            <div class="output" id="appInfoOutput">Loading...</div>
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="testPing()">🏓 Ping Test</button>
+                <button class="btn btn-secondary" onclick="loadAppInfo()">📱 App Info</button>
+                <button class="btn btn-secondary" onclick="testToast()">🔔 Toast Test</button>
+                <button class="btn btn-secondary" onclick="testLog()">📝 Log Test</button>
+            </div>
+        </section>
+
+        <!-- JS Bridge Status -->
+        <section class="card">
+            <h2>JS Bridge Durumu</h2>
+            <div class="status-grid" id="bridgeStatus">
+                <div class="status-item">
+                    <div class="status-label">Bridge</div>
+                    <div class="status-value pending" id="statusBridge">Checking...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">WebView</div>
+                    <div class="status-value ok" id="statusWebView">Loaded</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">DevTools</div>
+                    <div class="status-value ok" id="statusDevTools">Enabled</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">JS Context</div>
+                    <div class="status-value ok" id="statusJS">Active</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Termux Status (Phase 1) -->
+        <section class="card">
+            <h2>Termux Bağlantısı <span style="font-size:0.75rem; color:var(--warning);">(Phase 1)</span></h2>
+            <div class="output" id="termuxOutput">Henüz bağlı değil. Phase 1'de SSH mesh (port 8022-8031) entegre edilecek.</div>
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="testTermux()" disabled>🔌 Test Bağlantı</button>
+                <button class="btn btn-secondary" onclick="execTermuxCmd()" disabled>⌨️ Komut Çalıştır</button>
+            </div>
+        </section>
+
+        <!-- MCP Servers (Phase 2) -->
+        <section class="card">
+            <h2>MCP Sunucuları <span style="font-size:0.75rem; color:var(--warning);">(Phase 2)</span></h2>
+            <div class="output" id="mcpOutput">14 MCP sunucusu Minis'te hazır. APK içine bundle edilecek (Phase 2).</div>
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="listMCPServers()" disabled>📋 Sunucuları Listele</button>
+                <button class="btn btn-secondary" onclick="callMCPTool()" disabled>🔧 Tool Çağır</button>
+            </div>
+        </section>
+
+        <!-- AI Providers (Phase 4) -->
+        <section class="card">
+            <h2>AI Sağlayıcıları <span style="font-size:0.75rem; color:var(--warning);">(Phase 4)</span></h2>
+            <ul class="feature-list">
+                <li class="pending">Google Gemini (19 model hazır)</li>
+                <li class="pending">OpenAI (GPT-4o, o1)</li>
+                <li class="pending">Anthropic (Claude 3.5)</li>
+                <li class="pending">DeepSeek / Groq / OpenRouter</li>
+                <li class="pending">Local (llama.cpp, GGUF)</li>
+            </ul>
+        </section>
+
+        <!-- Extension System (Phase 3) -->
+        <section class="card">
+            <h2>Extension Sistemi <span style="font-size:0.75rem; color:var(--warning);">(Phase 3)</span></h2>
+            <ul class="feature-list">
+                <li class="pending">Manifest V3 uyumlu</li>
+                <li class="pending">WASM runtime (wasmer-android)</li>
+                <li class="pending">chrome.mcp / chrome.termux / chrome.ai API'leri</li>
+                <li class="pending">Side panel, command palette, DevTools</li>
+            </ul>
+        </section>
+
+        <!-- Roadmap -->
+        <section class="card">
+            <h2>Geliştirme Yol Haritası</h2>
+            <ul class="feature-list">
+                <li><strong>Phase 0:</strong> Minimal APK ✓ (Bu sürüm)</li>
+                <li class="pending"><strong>Phase 1:</strong> Termux SSH Mesh bağlantısı</li>
+                <li class="pending"><strong>Phase 2:</strong> MCP Server Bridge (14 server)</li>
+                <li class="pending"><strong>Phase 3:</strong> Extension Runtime (WASM)</li>
+                <li class="pending"><strong>Phase 4:</strong> Multi-Provider AI (10+ sağlayıcı)</li>
+                <li class="pending"><strong>Phase 5:</strong> Public API Registry + Parallel Tasks</li>
+                <li class="pending"><strong>Phase 6:</strong> Super Browser UI (Tabs, DevTools)</li>
+                <li class="pending"><strong>Phase 7:</strong> Code IDE + APK Builder</li>
+                <li class="pending"><strong>Phase 8:</strong> Polish, OTA, Play Store</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>MegaApp SuperBrowser • <a href="https://github.com/431veysel-coder/MegaApp" target="_blank">GitHub</a> • Built with ❤️ for Android</p>
+        <p>WebView DevTools: <code>chrome://inspect</code> ile debug edin</p>
+    </footer>
+
+    <script>
+        // Minis Bridge Ready Event
+        document.addEventListener('minisReady', (e) => {
+            console.log('Minis Bridge Ready:', e.detail);
+            log('success', `Minis Bridge Ready v${e.detail.version}`);
+            updateBridgeStatus();
+        });
+
+        // Logging helper
+        function log(type, message) {
+            const output = document.getElementById('appInfoOutput');
+            const time = new Date().toLocaleTimeString();
+            output.textContent += `\n[${time}] [${type.toUpperCase()}] ${message}`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateBridgeStatus() {
+            document.getElementById('statusBridge').textContent = 'Connected';
+            document.getElementById('statusBridge').className = 'status-value ok';
+        }
+
+        // Bridge Calls
+        async function testPing() {
+            log('log', 'Calling minis.ping()...');
+            try {
+                const result = await window.minis.ping();
+                log('success', `Ping result: ${result}`);
+            } catch (e) {
+                log('error', `Ping failed: ${e}`);
+            }
+        }
+
+        async function loadAppInfo() {
+            log('log', 'Calling minis.getAppInfo()...');
+            try {
+                const info = await window.minis.getAppInfo();
+                log('success', `App Info: ${JSON.stringify(info, null, 2)}`);
+            } catch (e) {
+                log('error', `App Info failed: ${e}`);
+            }
+        }
+
+        function testToast() {
+            window.minis.toast('Hello from JavaScript Bridge! 🎉');
+            log('log', 'Toast sent');
+        }
+
+        function testLog() {
+            window.minis.log('info', 'Test log from JavaScript');
+            window.minis.log('warn', 'Warning test');
+            window.minis.log('error', 'Error test');
+            log('log', 'Log calls sent to Android logcat');
+        }
+
+        // Termux (Phase 1)
+        async function testTermux() {
+            log('log', 'Testing Termux connection...');
+            try {
+                const result = await window.minis.termux.test();
+                log('success', `Termux: ${JSON.stringify(result)}`);
+            } catch (e) {
+                log('error', `Termux test failed: ${e}`);
+            }
+        }
+
+        async function execTermuxCmd() {
+            const cmd = prompt('Enter command:', 'echo "Hello from Termux"');
+            if (!cmd) return;
+            log('log', `Executing: ${cmd}`);
+            try {
+                const result = await window.minis.termux.exec(cmd);
+                log('success', `Result: ${JSON.stringify(result)}`);
+            } catch (e) {
+                log('error', `Exec failed: ${e}`);
+            }
+        }
+
+        // MCP (Phase 2)
+        async function listMCPServers() {
+            log('log', 'Listing MCP servers...');
+            try {
+                const result = await window.minis.mcp.listServers();
+                log('success', `Servers: ${result.servers.join(', ')}`);
+            } catch (e) {
+                log('error', `MCP list failed: ${e}`);
+            }
+        }
+
+        async function callMCPTool() {
+            const server = prompt('Server:', 'model-router');
+            const tool = prompt('Tool:', 'get_routing_stats');
+            if (!server || !tool) return;
+            log('log', `Calling ${server}.${tool}...`);
+            try {
+                const result = await window.minis.mcp.callTool(server, tool, {});
+                log('success', `Result: ${result.data}`);
+            } catch (e) {
+                log('error', `MCP call failed: ${e}`);
+            }
+        }
+
+        // Console log capture
+        console.log('MegaApp Phase 0 loaded');
+        console.log('Available bridge methods:', Object.keys(window.minis || {}));
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">MegaApp SuperBrowser</string>
+    <string name="app_short_name">MegaApp</string>
+    <string name="hello_webview">Hello MegaApp!</string>
+    <string name="bridge_ready">Bridge Ready</string>
+    <string name="termux_status_unknown">Termux: Unknown</string>
+    <string name="termux_status_connected">Termux: Connected</string>
+    <string name="termux_status_disconnected">Termux: Disconnected</string>
+    <string name="mcp_servers_loaded">MCP Servers: %1$d loaded</string>
+    <string name="tap_to_test">Tap to test JS Bridge</string>
+</resources>
