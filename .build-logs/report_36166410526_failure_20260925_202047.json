@@ -1,0 +1,41 @@
+{
+  "run_id": 36166410526,
+  "run_number": 5,
+  "status": "failure",
+  "conclusion": "failure",
+  "created_at": "2026-09-25T17:19:37Z",
+  "updated_at": "2026-09-25T17:20:22Z",
+  "head_branch": "main",
+  "head_sha": "b739ced191c77653708959925d62b3cca82b98d8",
+  "workflow": "android-build.yml",
+  "fixes_analyzed": [
+    {
+      "type": "android_license",
+      "description": "Android SDK licenses not accepted",
+      "fix": "yes | sdkmanager --licenses",
+      "files": [],
+      "confidence": 0.9
+    },
+    {
+      "type": "dependency_resolution",
+      "description": "Maven/Gradle dependency resolution failed",
+      "fix": "Check repository URLs, add mavenCentral(), check version numbers",
+      "files": [
+        "build.gradle.kts",
+        "app/build.gradle.kts",
+        "settings.gradle.kts"
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "fixes_applied": [
+    {
+      "type": "android_license",
+      "description": "Android SDK licenses not accepted",
+      "fix": "yes | sdkmanager --licenses",
+      "files": [],
+      "confidence": 0.9
+    }
+  ],
+  "fix_history_count": 5
+}

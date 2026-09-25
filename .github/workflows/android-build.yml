@@ -76,9 +76,6 @@ jobs:
             app/src/main/assets
           key: assets-${{ hashFiles('app/src/main/assets/**') }}
 
-      - name: Grant Gradle Permission
-        run: chmod +x ./gradlew
-
       - name: Setup Debug Keystore
         if: matrix.type == 'debug'
         run: |
@@ -96,11 +93,11 @@ jobs:
 
       - name: Build Debug APK
         if: matrix.type == 'debug'
-        run: ./gradlew :app:assembleDebug --no-daemon -Pabi=${{ matrix.arch }}
+        run: gradle :app:assembleDebug --no-daemon -Pabi=${{ matrix.arch }}
 
       - name: Build Release APK
         if: matrix.type == 'release'
-        run: ./gradlew :app:assembleRelease --no-daemon -Pabi=${{ matrix.arch }}
+        run: gradle :app:assembleRelease --no-daemon -Pabi=${{ matrix.arch }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -108,7 +105,7 @@ jobs:
 
       - name: Build Release Bundle (AAB)
         if: matrix.type == 'release'
-        run: ./gradlew :app:bundleRelease --no-daemon
+        run: gradle :app:bundleRelease --no-daemon
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -151,9 +148,8 @@ jobs:
           sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
                      "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
                      "platform-tools"
-      - run: chmod +x ./gradlew
-      - run: ./gradlew :app:lintDebug --no-daemon
-      - run: ./gradlew :app:testDebugUnitTest --no-daemon
+      - run: gradle :app:lintDebug --no-daemon
+      - run: gradle :app:testDebugUnitTest --no-daemon
 
   dependency-check:
     name: Dependency Check
@@ -172,5 +168,4 @@ jobs:
           sdkmanager "platforms;android-${{ env.ANDROID_SDK_VERSION }}" \
                      "build-tools;${{ env.ANDROID_SDK_VERSION }}.0.0" \
                      "platform-tools"
-      - run: chmod +x ./gradlew
-      - run: ./gradlew :app:dependencies --configuration releaseRuntimeClasspath --no-daemon
+      - run: gradle :app:dependencies --configuration releaseRuntimeClasspath --no-daemon
